@@ -23,7 +23,6 @@ test.describe('Claude Input Component', () => {
     await page.goto('http://localhost:3000/')
 
     // Fill in the form
-    await page.fill('#apiKey', 'mock-api-key')
     await page.fill('#userInput', 'Hello, Claude!')
 
     // Upload a file
@@ -37,10 +36,10 @@ test.describe('Claude Input Component', () => {
     await page.click('button:has-text("Send Request")')
 
     // Wait for the response to be displayed
-    await page.waitForSelector('pre')
+    await page.waitForSelector('#llm-input-response')
 
     // Check if the mocked response is displayed
-    const responseText = await page.textContent('pre')
+    const responseText = await page.textContent('#llm-input-response')
     expect(responseText).toContain('This is a mocked response from Claude.')
   })
 })

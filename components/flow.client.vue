@@ -1,30 +1,41 @@
 <script setup lang="ts">
-import type { Node, Edge } from '@vue-flow/core'
-import { VueFlow } from '@vue-flow/core'
+import type { Node } from '@vue-flow/core'
+import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 
-// these are our nodes
+const { addNodes, addEdges } = useVueFlow()
+
 const nodes = ref<Node[]>([
-  // an input node, specified by using `type: 'input'`
   {
     id: '1',
     type: 'llm',
     position: { x: 250, y: 5 },
-    // all nodes can have a data object containing any data you want to pass to the node
-    // a label can property can be used for default nodes
     data: { label: 'Node 1' },
   },
 ])
 
-// these are our edges
-const edges = ref<Edge[]>([])
+const onConnect = params => {
+  addEdges([params])
+}
+
+const onRequestComplete = responseData => {
+  const newNodeId = `result-${Date.now()}`
+  const newNode = {
+    id: newNodeId,
+    type: 'llm',
+    position: { x: 250, y: 200 },
+  }
+
+  addNodes([newNode])
+  addEdges([{ id: `e1-${newNodeId}`, source: '1', target: newNodeId }])
+}
 </script>
 
 <template>
-  <VueFlow :nodes="nodes" :edges="edges">
+  <VueFlow :nodes="nodes" @connect="onConnect">
     <Background />
-    <template #node-llm>
-      <LlmInputNode />
+    <template #node-llm="nodeProps">
+      <LlmInputNode @request-complete="onRequestComplete" />
     </template>
   </VueFlow>
 </template>

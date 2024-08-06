@@ -1,24 +1,12 @@
 <template>
   <div class="container mx-auto p-4">
     <h1 class="text-2xl font-bold mb-4">Claude API Interaction</h1>
-
-    <div class="mb-4">
-      <label for="apiKey" class="block mb-2">API Key:</label>
-      <input
-        v-model="apiKey"
-        type="password"
-        id="apiKey"
-        class="w-full p-2 border rounded"
-        placeholder="Enter your Anthropic API key"
-      />
-    </div>
-
     <div class="mb-4">
       <label for="userInput" class="block mb-2">User Input:</label>
       <textarea
         v-model="userInput"
         id="userInput"
-        class="w-full p-2 border rounded"
+        class="w-full p-2 border rounded text-black"
         rows="4"
         placeholder="Enter your message to Claude"
       ></textarea>
@@ -30,7 +18,7 @@
         type="file"
         id="fileInput"
         @change="handleFileInput"
-        class="w-full p-2 border rounded"
+        class="w-full p-2 border rounded text-black"
       />
     </div>
 
@@ -43,7 +31,9 @@
 
     <div v-if="response" class="mt-4">
       <h2 class="text-xl font-bold mb-2">Response:</h2>
-      <pre class="bg-gray-100 p-4 rounded">{{ response }}</pre>
+      <pre id="llm-input-response" class="bg-gray-100 p-4 rounded text-black">
+        {{ response }}
+      </pre>
     </div>
   </div>
 </template>
@@ -56,6 +46,7 @@ const apiKey = ref('')
 const userInput = ref('')
 const fileContent = ref('')
 const response = ref('')
+const emit = defineEmits(['requestComplete'])
 
 const handleFileInput = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
@@ -88,6 +79,7 @@ const sendRequest = async () => {
       }
     )
     response.value = JSON.stringify(res.data, null, 2)
+    emit('requestComplete', res.data)
   } catch (error) {
     console.error('Error:', error)
     response.value = 'An error occurred while sending the request.'
