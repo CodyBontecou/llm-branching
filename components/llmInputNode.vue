@@ -1,43 +1,3 @@
-<template>
-  <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Claude API Interaction</h1>
-    <div class="mb-4">
-      <label for="userInput" class="block mb-2">User Input:</label>
-      <textarea
-        v-model="userInput"
-        id="userInput"
-        class="w-full p-2 border rounded text-black"
-        rows="4"
-        placeholder="Enter your message to Claude"
-      ></textarea>
-    </div>
-
-    <div class="mb-4">
-      <label for="fileInput" class="block mb-2">File Input:</label>
-      <input
-        type="file"
-        id="fileInput"
-        @change="handleFileInput"
-        class="w-full p-2 border rounded text-black"
-      />
-    </div>
-
-    <button
-      @click="sendRequest"
-      class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-    >
-      Send Request
-    </button>
-
-    <div v-if="response" class="mt-4">
-      <h2 class="text-xl font-bold mb-2">Response:</h2>
-      <pre id="llm-input-response" class="bg-gray-100 p-4 rounded text-black">
-        {{ response }}
-      </pre>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
 import axios from 'axios'
@@ -86,3 +46,43 @@ const sendRequest = async () => {
   }
 }
 </script>
+
+<template>
+  <div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">Claude API Interaction</h1>
+    <div class="mb-4">
+      <label for="userInput" class="block mb-2">User Input:</label>
+      <textarea
+        v-model="userInput"
+        id="userInput"
+        class="w-full p-2 border rounded text-black"
+        rows="4"
+        placeholder="Enter your message to Claude"
+      ></textarea>
+    </div>
+
+    <div class="mb-4">
+      <label for="fileInput" class="block mb-2">File Input:</label>
+      <input
+        type="file"
+        id="fileInput"
+        @change="handleFileInput"
+        class="w-full p-2 border rounded text-black"
+      />
+    </div>
+
+    <button
+      @click="sendRequest"
+      class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+    >
+      Send Request
+    </button>
+
+    <div v-if="response" class="mt-4">
+      <h2 class="text-xl font-bold mb-2">Response:</h2>
+      <pre id="llm-input-response" class="bg-gray-100 p-4 rounded text-black">
+        {{ response }}
+      </pre>
+    </div>
+  </div>
+</template>
