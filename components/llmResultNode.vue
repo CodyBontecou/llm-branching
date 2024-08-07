@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { NodeResizer } from '@vue-flow/node-resizer'
 import type { ElementData, NodeProps } from '@vue-flow/core'
 import { computed } from 'vue'
+import '@vue-flow/node-resizer/dist/style.css'
 
 interface Props {
   nodeProps: NodeProps<ElementData, object, string>
@@ -18,7 +20,8 @@ const formattedResponse = computed(() => {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow-md p-4">
+  <NodeResizer :min-width="100" :min-height="50" color="transparent" />
+  <div class="bg-white rounded-lg shadow-md p-4 h-full w-full">
     {{ formattedResponse }}
   </div>
 </template>
