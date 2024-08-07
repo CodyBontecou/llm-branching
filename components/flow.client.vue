@@ -3,6 +3,7 @@ import type { Edge, Node } from '@vue-flow/core'
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { ref } from 'vue'
+import { v4 as uuidv4 } from 'uuid'
 
 const { addNodes, addEdges, getNode } = useVueFlow()
 
@@ -45,7 +46,31 @@ const createResultNode = (
 
   addEdges([newEdge])
 
-  return newNodeId
+  return newNode
+}
+
+const createLlmNode = (
+  sourceNodeId: string,
+  sourcePosition: { x: number; y: number }
+) => {
+  const newNode: Node = {
+    id: uuidv4(),
+    type: 'llm',
+    position: {
+      x: sourcePosition.x,
+      y: sourcePosition.y + 200,
+    },
+  }
+
+  addNodes([newNode])
+
+  const newEdge: Edge = {
+    id: `e-${sourceNodeId}-${newNode.id}`,
+    source: sourceNodeId,
+    target: newNode.id,
+  }
+
+  addEdges([newEdge])
 }
 
 const onRequestComplete = (
@@ -53,8 +78,9 @@ const onRequestComplete = (
   sourceNodeId: string,
   sourcePosition: { x: number; y: number }
 ) => {
-  const newNodeId = createResultNode(data, sourceNodeId, sourcePosition)
-  return newNodeId
+  const newNode = createResultNode(data, sourceNodeId, sourcePosition)
+  createLlmNode(newNode.id, newNode.position)
+  return newNode
 }
 </script>
 
