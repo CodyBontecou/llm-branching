@@ -30,7 +30,6 @@ const sendRequest = async (
 ) => {
   const { model, maxTokens } = { ...defaultConfig, ...config }
 
-  // Determine which API key to use based on the endpoint
   const apiKey = model.endpoint.includes('openai.com')
     ? runtimeConfig.public.OPENAI_API_KEY
     : runtimeConfig.public.CLAUDE_API_KEY
