@@ -13,16 +13,16 @@
         <DropdownMenuTrigger
           class="flex items-center justify-center focus:outline-none"
         >
-          {{ selectedModel }}
+          {{ selectedModel.name }}
           <Icon name="material-symbols:keyboard-arrow-down" class="ml-1" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem
             v-for="model in models"
-            :key="model"
+            :key="model.code"
             @click="selectModel(model)"
           >
-            {{ model }}
+            {{ model.name }}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -31,49 +31,42 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits } from 'vue'
-
 interface Props {
   placeholder?: string
   modelName?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
+interface Model {
+  name: string
+  code: string
+}
+
+withDefaults(defineProps<Props>(), {
   placeholder: 'How can Claude help you today?',
   modelName: 'Claude 3.5 Sonnet',
 })
 
 const inputValue = ref('')
-const fileContent = ref('')
-const selectedModel = ref(props.modelName)
-const models = ['Claude 3.5 Sonnet', 'Claude 3 Opus', 'Claude 3 Haiku']
+const models = ref<Model[]>([
+  { name: 'Claude 3.5 Sonnet', code: 'claude-3-sonnet-20240229' },
+  { name: 'Claude 3 Opus', code: 'claude-3-opus-20240229' },
+  { name: 'Claude 3 Haiku', code: 'claude-3-haiku-20240307' },
+])
+const selectedModel = ref(models.value[0])
+
 const emit = defineEmits([
   'update:modelValue',
   'addContent',
   'update:modelName',
+  'requestComplete',
 ])
 
-const selectModel = (model: string) => {
+const selectModel = (model: Model) => {
   selectedModel.value = model
   emit('update:modelName', model)
 }
 
 const emitInput = () => {
   emit('update:modelValue', inputValue.value)
-}
-
-const addContent = () => {
-  emit('addContent')
-}
-
-const handleFileInput = (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (file) {
-    const reader = new FileReader()
-    reader.onload = e => {
-      fileContent.value = e.target?.result as string
-    }
-    reader.readAsText(file)
-  }
 }
 </script>

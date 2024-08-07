@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import axios from 'axios'
 import type { ElementData, NodeProps } from '@vue-flow/core'
 
@@ -59,7 +58,7 @@ const sendRequest = async () => {
 
 <template>
   <div class="container mx-auto p-4">
-    <ClaudeInput
+    <ChatInput
       v-model="userInput"
       placeholder="How can Claude help you today?"
       modelName="Claude 3.5 Sonnet"
