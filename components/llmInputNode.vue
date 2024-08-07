@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ElementData, NodeProps } from '@vue-flow/core'
+import { NodeResizer } from '@vue-flow/node-resizer'
 import {
   sendRequest,
   type MessageContent,
@@ -71,20 +72,21 @@ const updateSelectedModel = (model: Model) => {
 </script>
 
 <template>
-  <div class="container mx-auto p-4">
-    <ChatInput
-      v-model="userInput"
-      placeholder="How can Claude help you today?"
-      :model-name="selectedModel.name"
-      @addContent="handleFileInput"
-      @update:selectedModel="updateSelectedModel"
-    />
+  <NodeResizer :min-width="100" :min-height="50" color="transparent" />
 
-    <button
-      @click="handleSendRequest"
-      class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-    >
-      Send Request
-    </button>
-  </div>
+  <ChatInput
+    class="h-full w-full"
+    v-model="userInput"
+    placeholder="How can Claude help you today?"
+    :model-name="selectedModel.name"
+    @addContent="handleFileInput"
+    @update:selectedModel="updateSelectedModel"
+  />
+
+  <button
+    @click="handleSendRequest"
+    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+  >
+    Send Request
+  </button>
 </template>
