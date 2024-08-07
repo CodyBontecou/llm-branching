@@ -1,9 +1,14 @@
 import axios from 'axios'
+import type { RuntimeConfig } from 'nuxt/schema'
+
+interface Model {
+  name: string
+  code: string
+  endpoint: string
+}
 
 interface RequestConfig {
-  endpoint: string
-  model: string
-  apiKey: string
+  model: Model
   maxTokens?: number
 }
 
@@ -12,33 +17,36 @@ interface MessageContent {
   content: string
 }
 
-const defaultConfig: RequestConfig = {
-  endpoint: 'https://api.anthropic.com/v1/messages',
-  model: 'claude-3-opus-20240229',
-  apiKey: '',
+const defaultConfig: Partial<RequestConfig> = {
   maxTokens: 1000,
 }
 
 const sendRequest = async (
   messages: MessageContent[],
-  config: Partial<RequestConfig> = {},
+  config: RequestConfig,
+  runtimeConfig: RuntimeConfig,
   onSuccess?: (data: any) => void,
   onError?: (error: any) => void
 ) => {
-  const { endpoint, model, apiKey, maxTokens } = { ...defaultConfig, ...config }
+  const { model, maxTokens } = { ...defaultConfig, ...config }
+
+  // Determine which API key to use based on the endpoint
+  const apiKey = model.endpoint.includes('openai.com')
+    ? runtimeConfig.public.OPENAI_API_KEY
+    : runtimeConfig.public.CLAUDE_API_KEY
 
   try {
     const res = await axios.post(
-      endpoint,
+      model.endpoint,
       {
         messages,
-        model,
+        model: model.code,
         max_tokens: maxTokens,
       },
       {
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': apiKey,
+          Authorization: `Bearer ${apiKey}`,
         },
       }
     )
@@ -58,4 +66,4 @@ const sendRequest = async (
 }
 
 export { sendRequest }
-export type { RequestConfig, MessageContent }
+export type { RequestConfig, MessageContent, Model }

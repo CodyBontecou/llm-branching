@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import axios from 'axios'
 import type { ElementData, NodeProps } from '@vue-flow/core'
 import {
   sendRequest,
   type MessageContent,
+  type Model,
   type RequestConfig,
 } from '~/lib/sendRequest'
 
@@ -12,11 +12,15 @@ interface Props {
   editMode: boolean
 }
 
-const apiKey = ref('')
+const runtimeConfig = useRuntimeConfig()
 const userInput = ref('')
 const fileContent = ref('')
-const response = ref('')
-const emit = defineEmits(['requestComplete'])
+const selectedModel = ref<Model>({
+  name: 'GPT4o Mini',
+  code: 'gpt-4o-mini',
+  endpoint: 'https://api.openai.com/v1/chat/completions',
+})
+const emit = defineEmits(['requestComplete', 'responseReceived'])
 const props = defineProps<Props>()
 
 const handleFileInput = (event: Event) => {
@@ -33,31 +37,36 @@ const handleFileInput = (event: Event) => {
 const handleSendRequest = async () => {
   const messages: MessageContent[] = [
     { role: 'user', content: userInput.value },
-    { role: 'user', content: fileContent.value },
   ]
 
-  const config: Partial<RequestConfig> = {
-    apiKey: apiKey.value,
+  const config: RequestConfig = {
+    model: selectedModel.value,
   }
 
   try {
-    const result = await sendRequest(
+    await sendRequest(
       messages,
       config,
+      runtimeConfig,
       data => {
-        response.value = JSON.stringify(data, null, 2)
-        emit('requestComplete', data, {
+        emit('requestComplete', data, props.nodeProps.id, {
           x: props.nodeProps.position.x,
           y: props.nodeProps.position.y,
         })
       },
       error => {
-        response.value = 'An error occurred while sending the request.'
+        emit('responseReceived', {
+          error: 'An error occurred while sending the request.',
+        })
       }
     )
   } catch (error) {
     console.error('Error:', error)
   }
+}
+
+const updateSelectedModel = (model: Model) => {
+  selectedModel.value = model
 }
 </script>
 
@@ -66,32 +75,16 @@ const handleSendRequest = async () => {
     <ChatInput
       v-model="userInput"
       placeholder="How can Claude help you today?"
-      modelName="Claude 3.5 Sonnet"
+      :model-name="selectedModel.name"
       @addContent="handleFileInput"
+      @update:selectedModel="updateSelectedModel"
     />
 
-    <!-- <div class="mb-4">
-      <label for="fileInput" class="block mb-2">File Input:</label>
-      <input
-        type="file"
-        id="fileInput"
-        @change="handleFileInput"
-        class="w-full p-2 border rounded text-black"
-      />
-    </div> -->
-
     <button
-      @click="sendRequest"
+      @click="handleSendRequest"
       class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
     >
       Send Request
     </button>
-
-    <div v-if="response" class="mt-4">
-      <h2 class="text-xl font-bold mb-2">Response:</h2>
-      <pre id="llm-input-response" class="bg-gray-100 p-4 rounded text-black">
-        {{ response }}
-      </pre>
-    </div>
   </div>
 </template>

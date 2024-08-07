@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { Node } from '@vue-flow/core'
+import type { Edge, Node } from '@vue-flow/core'
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { ref } from 'vue'
 
-const { addNodes, addEdges } = useVueFlow()
+const { addNodes, addEdges, getNode } = useVueFlow()
 
 const nodes = ref<Node[]>([
   {
@@ -19,16 +19,42 @@ const onConnect = params => {
   addEdges([params])
 }
 
-const onRequestComplete = (responseData, sourcePosition) => {
-  const newNodeId = `result-${Date.now()}`
-  const newNode = {
+const createResultNode = (
+  responseData: any,
+  sourceNodeId: string,
+  sourcePosition: { x: number; y: number }
+) => {
+  const newNodeId = `result-${sourceNodeId}}`
+  const newNode: Node = {
     id: newNodeId,
-    type: 'llm',
-    position: { x: sourcePosition.x, y: sourcePosition.y + 100 },
+    type: 'llmResult',
+    position: {
+      x: sourcePosition.x,
+      y: sourcePosition.y + 200,
+    },
+    data: { response: responseData },
   }
 
   addNodes([newNode])
-  addEdges([{ id: `e1-${newNodeId}`, source: '1', target: newNodeId }])
+
+  const newEdge: Edge = {
+    id: `e-${sourceNodeId}-${newNodeId}`,
+    source: sourceNodeId,
+    target: newNodeId,
+  }
+
+  addEdges([newEdge])
+
+  return newNodeId
+}
+
+const onRequestComplete = (
+  data: any,
+  sourceNodeId: string,
+  sourcePosition: { x: number; y: number }
+) => {
+  const newNodeId = createResultNode(data, sourceNodeId, sourcePosition)
+  return newNodeId
 }
 </script>
 
@@ -41,6 +67,10 @@ const onRequestComplete = (responseData, sourcePosition) => {
         :edit-mode="false"
         @request-complete="onRequestComplete"
       />
+    </template>
+
+    <template #node-llmResult="nodeProps">
+      <LlmResultNode :node-props="nodeProps" />
     </template>
   </VueFlow>
 </template>

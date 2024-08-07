@@ -39,6 +39,7 @@ interface Props {
 interface Model {
   name: string
   code: string
+  endpoint: string
 }
 
 withDefaults(defineProps<Props>(), {
@@ -48,9 +49,26 @@ withDefaults(defineProps<Props>(), {
 
 const inputValue = ref('')
 const models = ref<Model[]>([
-  { name: 'Claude 3.5 Sonnet', code: 'claude-3-sonnet-20240229' },
-  { name: 'Claude 3 Opus', code: 'claude-3-opus-20240229' },
-  { name: 'Claude 3 Haiku', code: 'claude-3-haiku-20240307' },
+  {
+    name: 'GPT4o Mini',
+    code: 'gpt-4o-mini',
+    endpoint: 'https://api.openai.com/v1/chat/completions',
+  },
+  {
+    name: 'Claude 3.5 Sonnet',
+    code: 'claude-3-sonnet-20240229',
+    endpoint: 'https://api.anthropic.com/v1/messages',
+  },
+  {
+    name: 'Claude 3 Opus',
+    code: 'claude-3-opus-20240229',
+    endpoint: 'https://api.anthropic.com/v1/messages',
+  },
+  {
+    name: 'Claude 3 Haiku',
+    code: 'claude-3-haiku-20240307',
+    endpoint: 'https://api.anthropic.com/v1/messages',
+  },
 ])
 const selectedModel = ref(models.value[0])
 
@@ -58,12 +76,14 @@ const emit = defineEmits([
   'update:modelValue',
   'addContent',
   'update:modelName',
+  'update:selectedModel',
   'requestComplete',
 ])
 
 const selectModel = (model: Model) => {
   selectedModel.value = model
-  emit('update:modelName', model)
+  emit('update:modelName', model.name)
+  emit('update:selectedModel', model)
 }
 
 const emitInput = () => {
