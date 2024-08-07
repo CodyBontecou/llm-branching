@@ -2,6 +2,7 @@
 import type { Node } from '@vue-flow/core'
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
+import { ref } from 'vue'
 
 const { addNodes, addEdges } = useVueFlow()
 
@@ -18,12 +19,12 @@ const onConnect = params => {
   addEdges([params])
 }
 
-const onRequestComplete = responseData => {
+const onRequestComplete = (responseData, sourcePosition) => {
   const newNodeId = `result-${Date.now()}`
   const newNode = {
     id: newNodeId,
     type: 'llm',
-    position: { x: 250, y: 200 },
+    position: { x: sourcePosition.x, y: sourcePosition.y + 100 },
   }
 
   addNodes([newNode])
@@ -35,7 +36,11 @@ const onRequestComplete = responseData => {
   <VueFlow :nodes="nodes" @connect="onConnect">
     <Background />
     <template #node-llm="nodeProps">
-      <LlmInputNode @request-complete="onRequestComplete" />
+      <LlmInputNode
+        :node-props="nodeProps"
+        :edit-mode="false"
+        @request-complete="onRequestComplete"
+      />
     </template>
   </VueFlow>
 </template>

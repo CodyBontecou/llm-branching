@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import axios from 'axios'
+import type { ElementData, NodeProps } from '@vue-flow/core'
+
+interface Props {
+  nodeProps: NodeProps<ElementData, object, string>
+  editMode: boolean
+}
 
 const apiKey = ref('')
 const userInput = ref('')
 const fileContent = ref('')
 const response = ref('')
 const emit = defineEmits(['requestComplete'])
+const props = defineProps<Props>()
 
 const handleFileInput = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
@@ -39,7 +46,10 @@ const sendRequest = async () => {
       }
     )
     response.value = JSON.stringify(res.data, null, 2)
-    emit('requestComplete', res.data)
+    emit('requestComplete', res.data, {
+      x: props.nodeProps.position.x,
+      y: props.nodeProps.position.y,
+    })
   } catch (error) {
     console.error('Error:', error)
     response.value = 'An error occurred while sending the request.'
@@ -49,19 +59,14 @@ const sendRequest = async () => {
 
 <template>
   <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Claude API Interaction</h1>
-    <div class="mb-4">
-      <label for="userInput" class="block mb-2">User Input:</label>
-      <textarea
-        v-model="userInput"
-        id="userInput"
-        class="w-full p-2 border rounded text-black"
-        rows="4"
-        placeholder="Enter your message to Claude"
-      ></textarea>
-    </div>
+    <ClaudeInput
+      v-model="userInput"
+      placeholder="How can Claude help you today?"
+      modelName="Claude 3.5 Sonnet"
+      @addContent="handleFileInput"
+    />
 
-    <div class="mb-4">
+    <!-- <div class="mb-4">
       <label for="fileInput" class="block mb-2">File Input:</label>
       <input
         type="file"
@@ -69,7 +74,7 @@ const sendRequest = async () => {
         @change="handleFileInput"
         class="w-full p-2 border rounded text-black"
       />
-    </div>
+    </div> -->
 
     <button
       @click="sendRequest"
