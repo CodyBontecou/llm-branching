@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between mb-2">
       <input
         v-model="inputValue"
-        :placeholder="placeholder"
+        :placeholder="`Chat with ${selectedModel.name}`"
         class="flex-grow text-lg outline-none mr-4"
         @input="emitInput"
       />

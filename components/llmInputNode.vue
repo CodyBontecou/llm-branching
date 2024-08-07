@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import axios from 'axios'
 import type { ElementData, NodeProps } from '@vue-flow/core'
+import {
+  sendRequest,
+  type MessageContent,
+  type RequestConfig,
+} from '~/lib/sendRequest'
 
 interface Props {
   nodeProps: NodeProps<ElementData, object, string>
@@ -25,33 +30,33 @@ const handleFileInput = (event: Event) => {
   }
 }
 
-const sendRequest = async () => {
+const handleSendRequest = async () => {
+  const messages: MessageContent[] = [
+    { role: 'user', content: userInput.value },
+    { role: 'user', content: fileContent.value },
+  ]
+
+  const config: Partial<RequestConfig> = {
+    apiKey: apiKey.value,
+  }
+
   try {
-    const res = await axios.post(
-      'https://api.anthropic.com/v1/messages',
-      {
-        messages: [
-          { role: 'user', content: userInput.value },
-          { role: 'user', content: fileContent.value },
-        ],
-        model: 'claude-3-opus-20240229',
-        max_tokens: 1000,
+    const result = await sendRequest(
+      messages,
+      config,
+      data => {
+        response.value = JSON.stringify(data, null, 2)
+        emit('requestComplete', data, {
+          x: props.nodeProps.position.x,
+          y: props.nodeProps.position.y,
+        })
       },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey.value,
-        },
+      error => {
+        response.value = 'An error occurred while sending the request.'
       }
     )
-    response.value = JSON.stringify(res.data, null, 2)
-    emit('requestComplete', res.data, {
-      x: props.nodeProps.position.x,
-      y: props.nodeProps.position.y,
-    })
   } catch (error) {
     console.error('Error:', error)
-    response.value = 'An error occurred while sending the request.'
   }
 }
 </script>
