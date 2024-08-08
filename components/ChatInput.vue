@@ -1,10 +1,11 @@
 <template>
   <div class="bg-white rounded-lg shadow-md p-4">
     <div class="flex items-center justify-between mb-2">
-      <input
+      <textarea
+        ref="textareaRef"
         v-model="inputValue"
         :placeholder="`Chat with ${selectedModel.name}`"
-        class="flex-grow text-lg outline-none mr-4"
+        class="flex-grow text-lg outline-none mr-4 resize-none overflow-hidden min-h-[40px] w-full min-w-96 overflow-y-scroll"
         @input="emitInput"
       />
     </div>
@@ -48,6 +49,7 @@ withDefaults(defineProps<Props>(), {
 })
 
 const inputValue = ref('')
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const models = ref<Model[]>([
   {
     name: 'GPT4o Mini',
@@ -87,6 +89,19 @@ const selectModel = (model: Model) => {
 }
 
 const emitInput = () => {
+  adjustTextareaHeight()
   emit('update:modelValue', inputValue.value)
 }
+
+const adjustTextareaHeight = () => {
+  if (textareaRef.value) {
+    textareaRef.value.style.height = 'auto'
+    const newHeight = Math.min(textareaRef.value.scrollHeight, 600)
+    textareaRef.value.style.height = `${newHeight}px`
+  }
+}
+
+onMounted(() => {
+  adjustTextareaHeight()
+})
 </script>

@@ -21,7 +21,7 @@ const formattedResponse = computed(() => {
 
 <template>
   <NodeResizer :min-width="100" :min-height="50" color="transparent" />
-  <div class="bg-white rounded-lg shadow-md p-4 h-full w-full">
+  <div class="bg-white rounded-lg shadow-md p-4 h-full w-full max-w-sm">
     {{ formattedResponse }}
   </div>
 </template>
