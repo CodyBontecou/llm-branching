@@ -5,7 +5,7 @@ import { Background } from '@vue-flow/background'
 import { ref } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 
-const { addNodes, addEdges, getNode } = useVueFlow()
+const { addNodes, addEdges, getNode, getEdges } = useVueFlow()
 
 const nodes = ref<Node[]>([
   {
@@ -15,6 +15,33 @@ const nodes = ref<Node[]>([
     data: { label: 'Node 1' },
   },
 ])
+
+const getConversationHistory = (nodeId: string) => {
+  const history = []
+  let currentNodeId: string | null = nodeId
+
+  while (currentNodeId) {
+    const currentNode = getNode.value(currentNodeId)
+    console.log(currentNode)
+    if (currentNode && currentNode.data.content) {
+      history.unshift({
+        role: currentNode.type === 'llm' ? 'user' : 'assistant',
+        content: currentNode.data.content,
+      })
+    }
+
+    const incomingEdge = getEdges.value.find(
+      edge => edge.target === currentNodeId
+    )
+
+    currentNodeId = incomingEdge ? incomingEdge.source : null
+  }
+
+  return history
+}
+
+// Provide the getConversationHistory function to child components
+provide('getConversationHistory', getConversationHistory)
 
 const onConnect = params => {
   addEdges([params])

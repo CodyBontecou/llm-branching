@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ElementData, NodeProps } from '@vue-flow/core'
+import { useVueFlow, type ElementData, type NodeProps } from '@vue-flow/core'
 import { NodeResizer } from '@vue-flow/node-resizer'
 import {
   sendRequest,
@@ -21,8 +21,11 @@ const selectedModel = ref<Model>({
   code: 'gpt-4o-mini',
   endpoint: 'https://api.openai.com/v1/chat/completions',
 })
+
+const getConversationHistory = inject('getConversationHistory')
 const emit = defineEmits(['requestComplete', 'responseReceived'])
 const props = defineProps<Props>()
+const { updateNode } = useVueFlow()
 
 const handleFileInput = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
@@ -36,7 +39,16 @@ const handleFileInput = (event: Event) => {
 }
 
 const handleSendRequest = async () => {
+  updateNode(props.nodeProps.id, {
+    data: {
+      ...props.nodeProps.data,
+      content: userInput.value,
+    },
+  })
+  const history = getConversationHistory(props.nodeProps.id)
+
   const messages: MessageContent[] = [
+    ...history,
     { role: 'user', content: userInput.value },
   ]
 
