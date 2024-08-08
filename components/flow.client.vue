@@ -22,11 +22,15 @@ const getConversationHistory = (nodeId: string) => {
 
   while (currentNodeId) {
     const currentNode = getNode.value(currentNodeId)
-    console.log(currentNode)
     if (currentNode && currentNode.data.content) {
       history.unshift({
-        role: currentNode.type === 'llm' ? 'user' : 'assistant',
+        role: 'user',
         content: currentNode.data.content,
+      })
+    } else if (currentNode && currentNode.data.response) {
+      history.unshift({
+        role: 'assistant',
+        content: currentNode.data.response.choices[0].message.content,
       })
     }
 
