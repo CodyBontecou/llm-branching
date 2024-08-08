@@ -5,6 +5,7 @@ import { Background } from '@vue-flow/background'
 import { ref } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 
+const verticalSpacing = 175
 const { addNodes, addEdges, getNode, getEdges } = useVueFlow()
 
 const nodes = ref<Node[]>([
@@ -57,12 +58,13 @@ const createResultNode = (
   sourcePosition: { x: number; y: number }
 ) => {
   const newNodeId = `result-${sourceNodeId}}`
+  const nodeType = 'llmResult'
   const newNode: Node = {
     id: newNodeId,
-    type: 'llmResult',
+    type: nodeType,
     position: {
       x: sourcePosition.x,
-      y: sourcePosition.y + 200,
+      y: sourcePosition.y + verticalSpacing,
     },
     data: { response: responseData },
   }
@@ -84,12 +86,14 @@ const createLlmNode = (
   sourceNodeId: string,
   sourcePosition: { x: number; y: number }
 ) => {
+  const nodeType = 'llm'
+
   const newNode: Node = {
     id: uuidv4(),
-    type: 'llm',
+    type: nodeType,
     position: {
       x: sourcePosition.x,
-      y: sourcePosition.y + 200,
+      y: sourcePosition.y + verticalSpacing,
     },
   }
 
