@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import type { Edge, Node } from '@vue-flow/core'
-import { VueFlow, useVueFlow } from '@vue-flow/core'
+import {
+  VueFlow,
+  useVueFlow,
+  type Node,
+  type Edge,
+  type Connection,
+  type OnConnectStartParams,
+} from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { ref } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
@@ -8,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid'
 const verticalSpacing = 175
 const { addNodes, addEdges, getNode, getEdges } = useVueFlow()
 
+const draggedNode = ref(null)
 const nodes = ref<Node[]>([
   {
     id: '1',
@@ -48,8 +55,73 @@ const getConversationHistory = (nodeId: string) => {
 // Provide the getConversationHistory function to child components
 provide('getConversationHistory', getConversationHistory)
 
-const onConnect = params => {
-  addEdges([params])
+const createNewNode = (
+  sourceId: string,
+  sourceHandle: string | null | undefined,
+  position?: { x: number; y: number }
+): Node => {
+  return {
+    id: `node-${Date.now()}`,
+    type: 'llm',
+    position: position || { x: 0, y: 0 },
+    data: { label: 'New Node' },
+  }
+}
+
+const onConnect = ({
+  source,
+  target,
+  sourceHandle,
+  targetHandle,
+}: Connection) => {
+  if (!target) {
+    const newNode = createNewNode(source, sourceHandle)
+    addNodes([newNode])
+    addEdges([{ id: `e${source}-${newNode.id}`, source, target: newNode.id }])
+  } else {
+    addEdges([
+      {
+        id: `e${source}-${target}`,
+        source,
+        target,
+        sourceHandle,
+        targetHandle,
+      },
+    ])
+  }
+}
+
+const onConnectStart = ({
+  event,
+  nodeId,
+  handleType,
+}: {
+  event: MouseEvent
+  nodeId: string
+  handleType: string
+}) => {
+  if (handleType === 'target') {
+    draggedNode.value = nodeId
+  }
+}
+
+const onConnectEnd = (event: MouseEvent) => {
+  if (draggedNode.value) {
+    const targetPosition = {
+      x: event.clientX,
+      y: event.clientY,
+    }
+    const newNode = createNewNode(draggedNode.value, null, targetPosition)
+    addNodes([newNode])
+    addEdges([
+      {
+        id: `e${draggedNode.value}-${newNode.id}`,
+        source: draggedNode.value,
+        target: newNode.id,
+      },
+    ])
+    draggedNode.value = null
+  }
 }
 
 const createResultNode = (
@@ -75,6 +147,7 @@ const createResultNode = (
     id: `e-${sourceNodeId}-${newNodeId}`,
     source: sourceNodeId,
     target: newNodeId,
+    updatable: true,
   }
 
   addEdges([newEdge])
@@ -103,6 +176,7 @@ const createLlmNode = (
     id: `e-${sourceNodeId}-${newNode.id}`,
     source: sourceNodeId,
     target: newNode.id,
+    updatable: true,
   }
 
   addEdges([newEdge])
@@ -120,7 +194,12 @@ const onRequestComplete = (
 </script>
 
 <template>
-  <VueFlow :nodes="nodes" @connect="onConnect">
+  <VueFlow
+    :nodes="nodes"
+    @connect="onConnect"
+    @connectStart="onConnectStart"
+    @connectEnd="onConnectEnd"
+  >
     <Background />
     <template #node-llm="nodeProps">
       <LlmInputNode

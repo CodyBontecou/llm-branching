@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import { useVueFlow, type ElementData, type NodeProps } from '@vue-flow/core'
-import { NodeResizer } from '@vue-flow/node-resizer'
 import {
-  sendRequest,
-  type MessageContent,
-  type Model,
-  type RequestConfig,
-} from '~/lib/sendRequest'
+  Handle,
+  Position,
+  type ElementData,
+  type NodeProps,
+} from '@vue-flow/core'
+import { NodeResizer } from '@vue-flow/node-resizer'
+import { type Model } from '~/lib/sendRequest'
 
 interface Props {
   nodeProps: NodeProps<ElementData, object, string>
   editMode: boolean
 }
 
-const runtimeConfig = useRuntimeConfig()
 const userInput = ref('')
 const fileContent = ref('')
 const selectedModel = ref<Model>({
@@ -22,10 +21,8 @@ const selectedModel = ref<Model>({
   endpoint: 'https://api.openai.com/v1/chat/completions',
 })
 
-const getConversationHistory = inject('getConversationHistory')
+defineProps<Props>()
 const emit = defineEmits(['requestComplete', 'responseReceived'])
-const props = defineProps<Props>()
-const { updateNode } = useVueFlow()
 
 const handleFileInput = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
@@ -38,48 +35,15 @@ const handleFileInput = (event: Event) => {
   }
 }
 
-const handleSendRequest = async () => {
-  updateNode(props.nodeProps.id, {
-    data: {
-      ...props.nodeProps.data,
-      content: userInput.value,
-    },
-  })
-  const history = getConversationHistory(props.nodeProps.id)
-
-  const messages: MessageContent[] = [
-    ...history,
-    { role: 'user', content: userInput.value },
-  ]
-
-  const config: RequestConfig = {
-    model: selectedModel.value,
-  }
-
-  try {
-    await sendRequest(
-      messages,
-      config,
-      runtimeConfig,
-      data => {
-        emit('requestComplete', data, props.nodeProps.id, {
-          x: props.nodeProps.position.x,
-          y: props.nodeProps.position.y,
-        })
-      },
-      error => {
-        emit('responseReceived', {
-          error: 'An error occurred while sending the request.',
-        })
-      }
-    )
-  } catch (error) {
-    console.error('Error:', error)
-  }
-}
-
 const updateSelectedModel = (model: Model) => {
   selectedModel.value = model
+}
+const forwardRequestComplete = (...args: any[]) => {
+  emit('requestComplete', ...args)
+}
+
+const forwardRequestResponse = (...args: any[]) => {
+  emit('responseReceived', ...args)
 }
 </script>
 
@@ -91,14 +55,12 @@ const updateSelectedModel = (model: Model) => {
     v-model="userInput"
     placeholder="How can Claude help you today?"
     :model-name="selectedModel.name"
+    :nodeProps="nodeProps"
     @addContent="handleFileInput"
     @update:selectedModel="updateSelectedModel"
+    @requestComplete="forwardRequestComplete"
+    @responseReceived="forwardRequestResponse"
   />
 
-  <button
-    @click="handleSendRequest"
-    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-  >
-    Send Request
-  </button>
+  <Handle type="target" :position="Position.Bottom" />
 </template>
