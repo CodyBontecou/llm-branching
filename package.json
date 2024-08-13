@@ -20,6 +20,8 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^0.424.0",
+    "markdown-it": "^14.1.0",
+    "marked": "^14.0.0",
     "nuxt": "^3.12.4",
     "radix-vue": "^1.9.3",
     "shadcn-nuxt": "^0.10.4",
@@ -32,6 +34,7 @@
     "@iconify-json/material-symbols": "^1.1.87",
     "@nuxtjs/tailwindcss": "^6.12.1",
     "@playwright/test": "^1.46.0",
+    "@types/markdown-it": "^14.1.2",
     "@types/node": "^22.1.0",
     "@types/uuid": "^10.0.0",
     "typescript": "^5.5.4"

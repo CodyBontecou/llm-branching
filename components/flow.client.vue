@@ -6,9 +6,10 @@ import {
   type Edge,
   type Connection,
   type OnConnectStartParams,
+  Position,
 } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
-import { ref } from 'vue'
+import { provide, ref } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 
 const verticalSpacing = 175
@@ -148,6 +149,8 @@ const createResultNode = (
     source: sourceNodeId,
     target: newNodeId,
     updatable: true,
+    sourceHandle: Position.Top,
+    targetHandle: Position.Bottom,
   }
 
   addEdges([newEdge])
@@ -177,6 +180,8 @@ const createLlmNode = (
     source: sourceNodeId,
     target: newNode.id,
     updatable: true,
+    sourceHandle: Position.Top,
+    targetHandle: Position.Bottom,
   }
 
   addEdges([newEdge])
